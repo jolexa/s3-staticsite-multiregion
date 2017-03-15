@@ -8,6 +8,7 @@ Resources:
   DestinationHealthCheckSNS:
     Type: AWS::SNS::Topic
 
+# NOTE: The alarm MUST be in us-east-1
   DestinationHealthCheckFailedAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
