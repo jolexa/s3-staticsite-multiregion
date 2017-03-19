@@ -10,7 +10,7 @@ deploy-all: deploy-standby deploy-primary
 
 deploy-standby-infra: deploy-acm
 	aws cloudformation deploy \
-		--template-file backup-region-infra.yml \
+		--template-file standby-region-infra.yml \
 		--stack-name $(STANDBY_STACKNAME)-infra \
 		--region $(STANDBY_REGION) \
 		--parameter-overrides "ACMCertArn=$(shell scripts/find-cfn-output-value.py --region us-east-1 --stack-name $(STACKNAME_BASE)-acm-certs --output-key ACMCertArn)" "SiteURL=$(STANDBY_URL)" \
@@ -20,7 +20,7 @@ deploy-standby: deploy-standby-infra
 	# HACK alert: Sigh, alarms for route53 healthchecks MUST be in us-east-1
 	# This is starting to smell like a SPOF
 	aws cloudformation deploy \
-		--template-file backup-region-alarms.yml \
+		--template-file standby-region-alarms.yml \
 		--stack-name $(STANDBY_STACKNAME)-alarms \
 		--region us-east-1 \
 		--parameter-overrides "DestinationHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key HealthCheckId --stack-name $(STANDBY_STACKNAME)-infra)" \
