@@ -4,7 +4,7 @@ Outputs:
   HealthCheckId:
     Description: "Physical ID of healthcheck"
     Value: !Ref DestinationHealthCheck
-  DestinationS3BucketArn:
+  StandbyReplBucketArn:
     Description: "Full S3 Bucket Arn"
     Value: !Join [ "", [ 'arn:aws:s3:::' , !Ref DestinationReplicationBucket ] ]
 Resources:

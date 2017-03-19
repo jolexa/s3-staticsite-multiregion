@@ -1,5 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
+Parameters:
+  StandbyReplBucketArn:
+    Type: String
+    Description: This is the bucket arn in the standby region
+
 Outputs:
   HealthCheckId:
     Description: "Physical ID of healthcheck"
@@ -8,12 +13,51 @@ Outputs:
     Description: "Full S3 Bucket Arn"
     Value: !Join [ "", [ 'arn:aws:s3:::' , !Ref PrimaryBucket ] ]
 Resources:
+  # Create a bucket
   PrimaryBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
       VersioningConfiguration:
         Status: Enabled
+      ReplicationConfiguration:
+        Role: !GetAtt StaticS3ReplRole.Arn
+        Rules:
+          - Id: ReplAll
+            Status: Enabled
+            Prefix: ""
+            Destination:
+              Bucket: !Ref StandbyReplBucketArn
+  # Role for the bucket
+  StaticS3ReplRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [s3.amazonaws.com]
+  # Policy for the role
+  BucketBackupPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action: ['s3:GetReplicationConfiguration', 's3:ListBucket']
+          Effect: Allow
+          Resource:
+          - !Join ['', ['arn:aws:s3:::', !Ref 'PrimaryBucket']]
+        - Action: ['s3:GetObjectVersion', 's3:GetObjectVersionAcl']
+          Effect: Allow
+          Resource:
+          - !Join ['', ['arn:aws:s3:::', !Ref 'PrimaryBucket', /*]]
+        - Action: ['s3:ReplicateObject', 's3:ReplicateDelete']
+          Effect: Allow
+          Resource:
+          - !Join ['', [ !Ref StandbyReplBucketArn, /* ] ]
+      PolicyName: BucketBackupPolicy
+      Roles: [ !Ref 'StaticS3ReplRole' ]
 
   PrimaryHealthCheck:
     Type: "AWS::Route53::HealthCheck"

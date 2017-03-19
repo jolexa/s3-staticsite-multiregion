@@ -1,8 +1,9 @@
 ACCOUNT=$(shell aws sts get-caller-identity --query Account --output text)
 PRIMARY_REGION="ca-central-1"
 STANDBY_REGION="us-west-2"
+STANDBY_STACKNAME_BASE="static-s3-region-failure-standby"
 
-deploy-all: deploy-primary deploy-standby
+deploy-all: deploy-standby deploy-primary
 
 deploy-standby-infra:
 	aws cloudformation deploy \
@@ -26,6 +27,7 @@ deploy-primary-infra:
 		--template-file primary-region-infra.yml \
 		--stack-name static-s3-region-failure-primary-infra \
 		--region $(PRIMARY_REGION) \
+		--parameter-overrides "StandbyReplBucketArn=$(shell scripts/find-StandbyReplBucketArn.py --region $(STANDBY_REGION) --stack-name $(STANDBY_STACKNAME_BASE)-infra)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 deploy-primary: deploy-primary-infra
