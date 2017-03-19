@@ -1,10 +1,12 @@
 ACCOUNT=$(shell aws sts get-caller-identity --query Account --output text)
+PRIMARY_REGION="ca-central-1"
+STANDBY_REGION="us-west-2"
 
 deploy-standby:
 	aws cloudformation deploy \
-		--template-file backup-region-template.yml \
+		--template-file backup-region-infra.yml \
 		--stack-name static-s3-region-failure-standby \
-		--region us-west-2 \
+		--region $(STANDBY_REGION) \
 		--capabilities CAPABILITY_IAM || exit 0
 	# HACK alert: Sigh, alarms for route53 healthchecks MUST be in us-east-1
 	# This is starting to smell like a SPOF
@@ -17,9 +19,9 @@ deploy-standby:
 
 deploy-primary:
 	aws cloudformation deploy \
-		--template-file primary-region-template.yml \
+		--template-file primary-region-infra.yml \
 		--stack-name static-s3-region-failure-primary \
-		--region us-east-2 \
+		--region $(PRIMARY_REGION) \
 		--capabilities CAPABILITY_IAM || exit 0
 	# HACK alert: Sigh, alarms for route53 healthchecks MUST be in us-east-1
 	# This is starting to smell like a SPOF
