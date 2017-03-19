@@ -6,6 +6,7 @@ import boto3
 parser = argparse.ArgumentParser(description='Find Output')
 parser.add_argument("--stack-name", dest="stackname", required=True)
 parser.add_argument("--region", dest="region", required=True)
+parser.add_argument("--output-key", dest="outputkey", required=True)
 args = parser.parse_args()
 
 client = boto3.client('cloudformation', region_name=args.region)
@@ -15,5 +16,5 @@ response = client.describe_stacks(
 
 # loop through outputs and find the correct one
 for output in response['Stacks'][0]['Outputs']:
-    if output['OutputKey'] == "StandbyReplBucketArn":
+    if output['OutputKey'] == args.outputkey:
         print output['OutputValue']

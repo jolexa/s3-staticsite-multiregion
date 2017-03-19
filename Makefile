@@ -37,7 +37,7 @@ deploy-primary-infra: deploy-primary-acm
 		--template-file primary-region-infra.yml \
 		--stack-name static-s3-region-failure-primary-infra \
 		--region $(PRIMARY_REGION) \
-		--parameter-overrides "StandbyReplBucketArn=$(shell scripts/find-StandbyReplBucketArn.py --region $(STANDBY_REGION) --stack-name $(STANDBY_STACKNAME_BASE)-infra)" \
+		--parameter-overrides "StandbyReplBucketArn=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyReplBucketArn --stack-name $(STANDBY_STACKNAME_BASE)-infra)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 deploy-primary: deploy-primary-infra
