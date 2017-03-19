@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  DestinationHealthCheckId:
+    Type: String
+
+Resources:
+  DestinationHealthCheckSNS:
+    Type: AWS::SNS::Topic
+
+# NOTE: The alarm MUST be in us-east-1
+  DestinationHealthCheckFailedAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: 'true'
+      AlarmActions: [ !Ref DestinationHealthCheckSNS ]
+      AlarmDescription: alarmed when status doesn't respond
+      ComparisonOperator: LessThanThreshold
+      EvaluationPeriods: '1'
+      MetricName: HealthCheckStatus
+      Namespace: AWS/Route53
+      Period: '60'
+      Statistic: Minimum
+      Threshold: '1.0'
+      Dimensions:
+      - Name: HealthCheckId
+        Value: !Ref DestinationHealthCheckId
