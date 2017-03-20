@@ -1,19 +1,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Parameters:
-  DestinationHealthCheckId:
+  PrimaryHealthCheckId:
     Type: String
 
 Resources:
-  DestinationHealthCheckSNS:
+  PrimaryHealthCheckSNS:
     Type: AWS::SNS::Topic
 
 # NOTE: The alarm MUST be in us-east-1
-  DestinationHealthCheckFailedAlarm:
+  PrimaryHealthCheckFailedAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       ActionsEnabled: 'true'
-      AlarmActions: [ !Ref DestinationHealthCheckSNS ]
+      AlarmActions: [ !Ref PrimaryHealthCheckSNS ]
       AlarmDescription: alarmed when status doesn't respond
       ComparisonOperator: LessThanThreshold
       EvaluationPeriods: '1'
@@ -24,4 +24,4 @@ Resources:
       Threshold: '1.0'
       Dimensions:
       - Name: HealthCheckId
-        Value: !Ref DestinationHealthCheckId
+        Value: !Ref PrimaryHealthCheckId

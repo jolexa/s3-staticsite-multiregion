@@ -9,32 +9,32 @@ Parameters:
     Description: This is the URL of the site
 
 Outputs:
-  HealthCheckId:
+  StandbyHealthCheckId:
     Description: "Physical ID of healthcheck"
-    Value: !Ref DestinationHealthCheck
+    Value: !Ref StandbyHealthCheck
   StandbyReplBucketArn:
     Description: "Full S3 Bucket Arn"
-    Value: !Join [ "", [ 'arn:aws:s3:::' , !Ref DestinationReplicationBucket ] ]
+    Value: !Join [ "", [ 'arn:aws:s3:::' , !Ref StandbyReplicationBucket ] ]
 Resources:
-  DestinationReplicationBucket:
+  StandbyReplicationBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
       VersioningConfiguration:
         Status: Enabled
 
-  DestinationHealthCheck:
+  StandbyHealthCheck:
     Type: "AWS::Route53::HealthCheck"
     Properties:
       HealthCheckConfig:
         FullyQualifiedDomainName: !Join [ '.', [ !Join [ '-', [ "s3", !Ref "AWS::Region" ] ], "amazonaws.com" ] ]
         Type: "HTTPS"
-        ResourcePath: !Join [ '/', [ '', !Ref 'DestinationReplicationBucket', 'index.html' ] ]
+        ResourcePath: !Join [ '/', [ '', !Ref 'StandbyReplicationBucket', 'index.html' ] ]
       HealthCheckTags:
         - Key: "Name"
-          Value: "DestinationBucketHealthCheck"
+          Value: "StandbyBucketHealthCheck"
 
-  DestinationCloudFrontDistribution:
+  StandbyCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
@@ -43,14 +43,14 @@ Resources:
         DefaultCacheBehavior:
           ForwardedValues:
             QueryString: false
-          TargetOriginId: DestinationBucketOrigin
+          TargetOriginId: StandbyBucketOrigin
           ViewerProtocolPolicy: allow-all
         DefaultRootObject: index.html
         Enabled: true
         HttpVersion: http2
         Origins:
-        - DomainName: !Join [ '.', [ !Ref DestinationReplicationBucket, 's3.amazonaws.com' ] ]
-          Id: DestinationBucketOrigin
+        - DomainName: !Join [ '.', [ !Ref StandbyReplicationBucket, 's3.amazonaws.com' ] ]
+          Id: StandbyBucketOrigin
           S3OriginConfig:
             OriginAccessIdentity: ""
         PriceClass: PriceClass_100

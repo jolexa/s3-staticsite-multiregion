@@ -12,7 +12,7 @@ Parameters:
     Description: This is the URL of the site
 
 Outputs:
-  HealthCheckId:
+  PrimaryHealthCheckId:
     Description: "Physical ID of healthcheck"
     Value: !Ref PrimaryHealthCheck
   PrimaryS3BucketArn:

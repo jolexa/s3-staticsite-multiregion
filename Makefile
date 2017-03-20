@@ -23,7 +23,7 @@ deploy-standby: deploy-standby-infra
 		--template-file standby-region-alarms.yml \
 		--stack-name $(STANDBY_STACKNAME)-alarms \
 		--region us-east-1 \
-		--parameter-overrides "DestinationHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key HealthCheckId --stack-name $(STANDBY_STACKNAME)-infra)" \
+		--parameter-overrides "StandbyHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyHealthCheckId --stack-name $(STANDBY_STACKNAME)-infra)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 deploy-acm:
@@ -50,5 +50,5 @@ deploy-primary: deploy-primary-infra
 		--template-file primary-region-alarms.yml \
 		--stack-name $(PRIMARY_STACKNAME)-alarms \
 		--region us-east-1 \
-		--parameter-overrides "DestinationHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key HealthCheckId --stack-name $(PRIMARY_STACKNAME)-infra)" \
+		--parameter-overrides "PrimaryHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key PrimaryHealthCheckId --stack-name $(PRIMARY_STACKNAME)-infra)" \
 		--capabilities CAPABILITY_IAM || exit 0
