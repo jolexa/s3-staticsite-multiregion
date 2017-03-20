@@ -4,6 +4,13 @@ Parameters:
   PrimaryHealthCheckId:
     Type: String
 
+Outputs:
+  PrimaryHealthCheckSNSArn:
+    Description: SNS Arn
+    Value: !Ref PrimaryHealthCheckSNS
+    Export:
+      Name: PrimaryHealthCheckSNSArn
+
 Resources:
   PrimaryHealthCheckSNS:
     Type: AWS::SNS::Topic
