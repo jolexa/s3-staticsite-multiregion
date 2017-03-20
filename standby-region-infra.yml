@@ -15,6 +15,12 @@ Outputs:
   StandbyReplBucketArn:
     Description: "Full S3 Bucket Arn"
     Value: !Join [ "", [ 'arn:aws:s3:::' , !Ref StandbyReplicationBucket ] ]
+  StandbyCloudFrontDistributionDomainName:
+    Description: Domain Name
+    Value: !GetAtt StandbyCloudFrontDistribution.DomainName
+    Export:
+      Name: StandbyCloudFrontDistributionDomainName
+
 Resources:
   StandbyReplicationBucket:
     Type: AWS::S3::Bucket

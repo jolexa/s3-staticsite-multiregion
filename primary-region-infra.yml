@@ -18,6 +18,12 @@ Outputs:
   PrimaryS3BucketArn:
     Description: "Full S3 Bucket Arn"
     Value: !Join [ "", [ 'arn:aws:s3:::' , !Ref PrimaryBucket ] ]
+  PrimaryCloudFrontDistributionDomainName:
+    Description: Domain Name
+    Value: !GetAtt PrimaryCloudFrontDistribution.DomainName
+    Export:
+      Name: PrimaryCloudFrontDistributionDomainName
+
 Resources:
   # Create a bucket
   PrimaryBucket:
