@@ -54,7 +54,7 @@ Resources:
           ForwardedValues:
             QueryString: false
           TargetOriginId: StandbyBucketOrigin
-          ViewerProtocolPolicy: allow-all
+          ViewerProtocolPolicy: redirect-to-https
         DefaultRootObject: index.html
         Enabled: true
         HttpVersion: http2

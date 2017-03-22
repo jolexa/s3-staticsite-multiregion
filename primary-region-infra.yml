@@ -96,7 +96,7 @@ Resources:
           ForwardedValues:
             QueryString: false
           TargetOriginId: PrimaryBucketOrigin
-          ViewerProtocolPolicy: allow-all
+          ViewerProtocolPolicy: redirect-to-https
         DefaultRootObject: index.html
         Enabled: 'true'
         HttpVersion: http2
