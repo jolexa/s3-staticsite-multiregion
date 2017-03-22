@@ -63,7 +63,7 @@ deploy-route53: deploy-primary-infra deploy-standby-infra
 		--stack-name $(STANDBY_STACKNAME)-route53 \
 		--region $(STANDBY_REGION) \
 		--parameter-overrides \
-		"PrimarySiteURL=$(STANDBY_URL)" \
+		"StandbySiteURL=$(STANDBY_URL)" \
 		"ZoneName=$(ZONE)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
