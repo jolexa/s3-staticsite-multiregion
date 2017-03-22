@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  PrimarySiteURL:
+    Type: String
+    Description: This is the URL of the site
+  ZoneName:
+    Type: String
+    Description: This is the ZoneName of the SiteURL
+
+Resources:
+  PrimaryDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !ImportValue PrimaryCloudFrontDistributionDomainName
+        HostedZoneId: Z2FDTNDATAQYW2 # CloudFront zone id hardcoded by design
+      HostedZoneName: !Ref ZoneName
+      Comment: DNS ALIAS for PrimaryCloudFrontDistribution
+      Name: !Ref PrimarySiteURL
+      Type: A
