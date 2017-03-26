@@ -8,6 +8,8 @@ Parameters:
     Type: String
   HostedZoneName:
     Type: String
+  PrimaryUrl:
+    Type: String
 
 
 Outputs:
@@ -48,10 +50,15 @@ Resources:
       Description: Updates CF distro and Route53
       MemorySize: 128
       Timeout: 10
+      Policies:
+        - Statement:
+            Effect: Allow
+            Action: ['route53:ListHostedZonesByName', 'route53:ListResourceRecordSets' ]
+            Resource: '*'
       Environment:
         Variables:
-          R53StackName: "asdf"
           HostedZoneName: !Ref HostedZoneName
+          PrimaryUrl: !Ref PrimaryUrl
       Events:
         SNS:
           Type: SNS
