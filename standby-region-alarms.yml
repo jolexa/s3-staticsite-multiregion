@@ -4,6 +4,11 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   StandbyHealthCheckId:
     Type: String
+  StandbyCloudFrontDistributionDomainName:
+    Type: String
+  HostedZoneName:
+    Type: String
+
 
 Outputs:
   StandbyHealthCheckSNSArn:
@@ -22,7 +27,7 @@ Resources:
     Properties:
       ActionsEnabled: 'true'
       AlarmActions: [ !Ref StandbyHealthCheckSNS ]
-      AlarmDescription: alarmed when status doesn't respond
+      AlarmDescription: !Ref StandbyCloudFrontDistributionDomainName
       ComparisonOperator: LessThanThreshold
       EvaluationPeriods: '1'
       MetricName: HealthCheckStatus
@@ -46,6 +51,7 @@ Resources:
       Environment:
         Variables:
           R53StackName: "asdf"
+          HostedZoneName: !Ref HostedZoneName
       Events:
         SNS:
           Type: SNS
