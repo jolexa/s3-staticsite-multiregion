@@ -35,7 +35,7 @@ deploy-standby: deploy-standby-infra
 		--parameter-overrides "StandbyHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyHealthCheckId --stack-name $(STANDBY_STACKNAME)-infra)" \
 		"StandbyCloudFrontDistributionDomainName=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyCloudFrontDistributionDomainName --stack-name $(STANDBY_STACKNAME)-infra)" \
 		"HostedZoneName=$(ZONE)" \
-		"StandbyUrl=$(PRIMARY_URL)" \
+		"PrimaryUrl=$(PRIMARY_URL)" \
 		--capabilities CAPABILITY_IAM || exit 0
 	rm -f new-standby-region-alarms.yml
 

@@ -26,7 +26,7 @@ def check_matching(dnsrecord, cfdistro):
         StartRecordName=dnsrecord,
         MaxItems='1'
     )
-    dns = response['ResourceRecordSets'][0]['AliasTarget']['DNSName']
+    dns = response['ResourceRecordSets'][0]['AliasTarget']['DNSName'].rstrip('.')
     if dns == cfdistro:
         return True
     else:
@@ -38,7 +38,7 @@ def lambda_handler(event, context):
     #   If the event is from the site that doesn't match the CNAME, exit
     sns_message = json.loads(event['Records'][0]['Sns']['Message'])
     print(sns_message)
-    endpoint = sns_message['AlarmDescription']
+    endpoint = str(sns_message['AlarmDescription'])
     print(endpoint)
     if check_matching(os.environ['PrimaryUrl'], endpoint ):
         # update_route53()
