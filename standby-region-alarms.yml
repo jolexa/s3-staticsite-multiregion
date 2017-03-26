@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 
 Parameters:
   StandbyHealthCheckId:
@@ -32,3 +33,21 @@ Resources:
       Dimensions:
       - Name: HealthCheckId
         Value: !Ref StandbyHealthCheckId
+
+  StandbyHealthCheckFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python2.7
+      CodeUri: ./deployment.zip
+      Description: Updates CF distro and Route53
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          R53StackName: "asdf"
+      Events:
+        SNS:
+          Type: SNS
+          Properties:
+            Topic: !Ref StandbyHealthCheckSNS

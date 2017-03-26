@@ -1,8 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 
 Parameters:
   PrimaryHealthCheckId:
     Type: String
+  PrimaryCloudFrontDistributionDomainName:
+    Type: String
+  HostedZoneName:
+    Type: String
+
 
 Outputs:
   PrimaryHealthCheckSNSArn:
@@ -21,7 +27,7 @@ Resources:
     Properties:
       ActionsEnabled: 'true'
       AlarmActions: [ !Ref PrimaryHealthCheckSNS ]
-      AlarmDescription: alarmed when status doesn't respond
+      AlarmDescription: !Ref PrimaryCloudFrontDistributionDomainName
       ComparisonOperator: LessThanThreshold
       EvaluationPeriods: '1'
       MetricName: HealthCheckStatus
@@ -32,3 +38,22 @@ Resources:
       Dimensions:
       - Name: HealthCheckId
         Value: !Ref PrimaryHealthCheckId
+
+  PrimaryHealthCheckFunction:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python2.7
+      CodeUri: ./deployment.zip
+      Description: Updates CF distro and Route53
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          R53StackName: "asdf"
+          HostedZoneName: !Ref HostedZoneName
+      Events:
+        SNS:
+          Type: SNS
+          Properties:
+            Topic: !Ref PrimaryHealthCheckSNS
