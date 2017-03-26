@@ -16,7 +16,7 @@ def find_zone_id(dnsname):
 def update_route53(source, target):
     return
 
-def check_matching(dnsrecord, match):
+def check_matching(dnsrecord, cfdistro):
     '''
     If 'dnsrecord' matches the 'match' then return true
     otherwise, return false
@@ -27,7 +27,7 @@ def check_matching(dnsrecord, match):
         MaxItems='1'
     )
     dns = response['ResourceRecordSets'][0]['AliasTarget']['DNSName']
-    if dns == match:
+    if dns == cfdistro:
         return True
     else:
         return False
@@ -40,7 +40,7 @@ def lambda_handler(event, context):
     print(sns_message)
     endpoint = sns_message['AlarmDescription']
     print(endpoint)
-    if check_matching(endpoint, os.environ['PrimaryUrl'] ):
+    if check_matching(os.environ['PrimaryUrl'], endpoint ):
         # update_route53()
         print("I should change the DNS record now")
     else:
