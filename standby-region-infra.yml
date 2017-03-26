@@ -37,7 +37,7 @@ Resources:
     Properties:
       HealthCheckConfig:
         FullyQualifiedDomainName: !Join [ '.', [ !Join [ '-', [ "s3", !Ref "AWS::Region" ] ], "amazonaws.com" ] ]
-        Type: "HTTPS"
+        Type: "HTTP"
         ResourcePath: !Join [ '/', [ '', !Ref 'StandbyReplicationBucket', 'index.html' ] ]
       HealthCheckTags:
         - Key: "Name"
