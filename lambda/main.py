@@ -14,6 +14,9 @@ def find_zone_id(dnsname):
         )
     return response['HostedZones'][0]['Id'].split('/')[-1]
 
+def get_cloudformation_template(stackname, region):
+    return
+
 def update_route53(url, zonename, aliastarget):
     '''
     url = www.example.com
@@ -41,6 +44,7 @@ def update_route53(url, zonename, aliastarget):
     )
 
 def update_cf_cname(distroid, newcname):
+    '''It is ok to do this outside of cloudformation because resource can still be managed with cloudformation '''
     print("update_cf_cname args: {0}, {1}".format(distroid, newcname))
     # Fetch the DistributionConfig
     response = cfrontclient.get_distribution_config(
@@ -132,6 +136,8 @@ def lambda_handler(event, context):
             initial stack and serve primary url -> standby distro and serve
             standby url -> primary distro (so you can check to see if the
             primary region is back online, in theory)
+            
+            Is there REALLY a good way to clean this up, though?
 
             '''
 
