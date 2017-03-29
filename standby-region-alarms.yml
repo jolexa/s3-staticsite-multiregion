@@ -4,13 +4,16 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   StandbyHealthCheckId:
     Type: String
+  PrimaryCloudFrontDistributionDomainName:
+    Type: String
   StandbyCloudFrontDistributionDomainName:
     Type: String
   HostedZoneName:
     Type: String
   PrimaryUrl:
     Type: String
-
+  StandbyUrl:
+    Type: String
 
 Outputs:
   StandbyHealthCheckSNSArn:
@@ -49,16 +52,29 @@ Resources:
       CodeUri: ./deployment.zip
       Description: Updates CF distro and Route53
       MemorySize: 128
-      Timeout: 10
+      Timeout: 30
       Policies:
         - Statement:
             Effect: Allow
-            Action: ['route53:ListHostedZonesByName', 'route53:ListResourceRecordSets' ]
+            Action:
+                - 'route53:ChangeResourceRecordSets'
+                - 'route53:ListHostedZonesByName'
+                - 'route53:ListResourceRecordSets'
+            Resource: '*'
+        - Statement:
+            Effect: Allow
+            Action:
+                - 'cloudfront:GetDistributionConfig'
+                - 'cloudfront:ListDistributions'
+                - 'cloudfront:UpdateDistribution'
             Resource: '*'
       Environment:
         Variables:
           HostedZoneName: !Ref HostedZoneName
           PrimaryUrl: !Ref PrimaryUrl
+          StandbyUrl: !Ref StandbyUrl
+          PrimaryCloudFrontDistributionDomainName: !Ref PrimaryCloudFrontDistributionDomainName
+          StandbyCloudFrontDistributionDomainName: !Ref StandbyCloudFrontDistributionDomainName
       Events:
         SNS:
           Type: SNS

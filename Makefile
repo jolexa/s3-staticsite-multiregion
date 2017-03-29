@@ -33,9 +33,11 @@ deploy-standby: deploy-standby-infra
 		--stack-name $(STANDBY_STACKNAME)-alarms \
 		--region us-east-1 \
 		--parameter-overrides "StandbyHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyHealthCheckId --stack-name $(STANDBY_STACKNAME)-infra)" \
+		"PrimaryCloudFrontDistributionDomainName=$(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key PrimaryCloudFrontDistributionDomainName --stack-name $(PRIMARY_STACKNAME)-infra)" \
 		"StandbyCloudFrontDistributionDomainName=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyCloudFrontDistributionDomainName --stack-name $(STANDBY_STACKNAME)-infra)" \
 		"HostedZoneName=$(ZONE)" \
 		"PrimaryUrl=$(PRIMARY_URL)" \
+		"StandbyUrl=$(STANDBY_URL)" \
 		--capabilities CAPABILITY_IAM || exit 0
 	rm -f new-standby-region-alarms.yml
 
@@ -92,7 +94,9 @@ deploy-primary: deploy-primary-infra
 		--region us-east-1 \
 		--parameter-overrides "PrimaryHealthCheckId=$(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key PrimaryHealthCheckId --stack-name $(PRIMARY_STACKNAME)-infra)" \
 		"PrimaryCloudFrontDistributionDomainName=$(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key PrimaryCloudFrontDistributionDomainName --stack-name $(PRIMARY_STACKNAME)-infra)" \
+		"StandbyCloudFrontDistributionDomainName=$(shell scripts/find-cfn-output-value.py --region $(STANDBY_REGION) --output-key StandbyCloudFrontDistributionDomainName --stack-name $(STANDBY_STACKNAME)-infra)" \
 		"HostedZoneName=$(ZONE)" \
 		"PrimaryUrl=$(PRIMARY_URL)" \
+		"StandbyUrl=$(STANDBY_URL)" \
 		--capabilities CAPABILITY_IAM || exit 0
 	rm -f new-primary-region-alarms.yml
