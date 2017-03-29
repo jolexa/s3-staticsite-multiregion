@@ -67,3 +67,11 @@ Resources:
         ViewerCertificate:
           AcmCertificateArn: !Ref ACMCertArn
           SslSupportMethod: sni-only
+  Route53Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3.amazonaws.com/static-s3-region-failure-artifacts/nested-route53.yml
+      Parameters:
+        ZoneName: !Ref ZoneName
+        SiteURL: !Ref SiteURL
+        AliasTargetDNSName: !GetAtt StandbyCloudFrontDistribution.DomainName
