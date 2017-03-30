@@ -27,6 +27,9 @@ Outputs:
   CloudFrontDistributionID:
     Description: CF ID
     Value: !Ref PrimaryCloudFrontDistribution
+  Route53StackName:
+    Description: Nested Stack Name
+    Value: !GetAtt Route53Stack.Outputs.StackName
 
 Resources:
   # Create a bucket

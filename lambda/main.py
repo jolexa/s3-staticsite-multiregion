@@ -2,6 +2,7 @@
 
 import os
 import json
+import time
 import boto3
 
 def find_zone_id(dnsname):
@@ -85,14 +86,18 @@ def get_cf_id_from_cfn(stackname, region='ca-central-1'):
     for i in outputs:
         if i['OutputKey'] == "CloudFrontDistributionID":
             return i['OutputValue']
+def get_r53_stack_from_cfn(stackname, region='ca-central-1'):
+    print("get_r53_stack_from_cfn args: {0} {1}".format(stackname, region))
+    outputs = get_cloudformation_outputs(stackname, region)
+    for i in outputs:
+        if i['OutputKey'] == "Route53StackName":
+            return i['OutputValue']
 
 def lambda_handler(event, context):
     sns_message = json.loads(event['Records'][0]['Sns']['Message'])
     print(sns_message)
     alarm_cfendpoint = str(sns_message['AlarmDescription'])
     print(alarm_cfendpoint)
-    purl = os.environ['PrimaryUrl']
-    surl = os.environ['StandbyUrl']
 
     if is_live_site(alarm_cfendpoint):
         # This means our site is down because the primary url is down!
@@ -116,21 +121,52 @@ def lambda_handler(event, context):
               for some time
         4) That Should be it
         '''
+        # Non-Live Distro gets a temp cname
         otherdistro = get_cf_id_from_cfn(os.environ['OtherInfraStackName'],
                 region=os.environ['OtherInfraStackRegion'])
         update_cf_cname(otherdistro, "temp.com")
 
+        # Live CNAME becomes Non-Live ("automatically-fixed")
+        # This is an odd thing to do because the Route53 stack is nested so it
+        # would automatically update. The problem is... there is a race
+        # condition between the two stacks and both route53 records are trying
+        # to become eachother. Further, since it is a nested stack, it will
+        # update again to what we expect. Seems elegant despite the kludge
+        myr53stackname = get_r53_stack_from_cfn(os.environ['MyInfraStackName'],
+                os.environ['MyInfraStackRegion'])
+        update_stack(myr53stackname,
+            "automatically-fixed."+os.environ['HostedZoneName'].strip('.'),
+            os.environ['MyInfraStackRegion']
+            )
+        # Live Distro becomes Non-Live
         update_stack(os.environ['MyInfraStackName'],
             os.environ['StandbyUrl'],
             os.environ['MyInfraStackRegion']
             )
+
+        # Hopefully this is enough time to let the Route53 race settle
+        print("Sleeping 20 seconds...")
+        time.sleep(20)
+
+        # Non-Live CNAME becomes Live
+        # Nested stack WOULD get updated eventually but the kicker is that
+        # cloudformation won't update it until the CF Distro is done updating.
+        # Despite the CF "Deploying" Status, it is serving traffic right away.
+        # Therefore, we break out of the nested stack paradigm and update the
+        # stack right away
+        otherr53stackname = get_r53_stack_from_cfn(os.environ['OtherInfraStackName'],
+                os.environ['OtherInfraStackRegion'])
+        update_stack(otherr53stackname,
+            os.environ['PrimaryUrl'],
+            os.environ['OtherInfraStackRegion']
+            )
+        # Non-Live Distro becomes Live
         update_stack(os.environ['OtherInfraStackName'],
             os.environ['PrimaryUrl'],
             os.environ['OtherInfraStackRegion']
             )
 
     else:
-
         # This means, the Standby Url is down which is bad but not worth
         # making the stacks 'dirty'
         # publish to SNS?

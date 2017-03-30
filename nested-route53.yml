@@ -11,6 +11,11 @@ Parameters:
     Type: String
     Description: This is the DNS Name of the CloudFront Distro
 
+Outputs:
+  StackName:
+    Description: This is the StackName
+    Value: !Ref 'AWS::StackName'
+
 Resources:
   DNSRecord:
     Type: AWS::Route53::RecordSet

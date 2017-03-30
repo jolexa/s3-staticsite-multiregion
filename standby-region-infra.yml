@@ -24,6 +24,9 @@ Outputs:
   CloudFrontDistributionID:
     Description: CF ID
     Value: !Ref StandbyCloudFrontDistribution
+  Route53StackName:
+    Description: Nested Stack Name
+    Value: !GetAtt Route53Stack.Outputs.StackName
 
 Resources:
   StandbyReplicationBucket:
