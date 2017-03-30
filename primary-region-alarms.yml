@@ -79,6 +79,12 @@ Resources:
                 - 'cloudformation:GetTemplate'
                 - 'cloudformation:UpdateStack'
             Resource: '*'
+        # Needed for the lambda to update cloudformation
+        - Statement:
+            Effect: Allow
+            Action:
+                - 'cloudfront:GetDistribution'
+            Resource: '*'
       Environment:
         Variables:
           HostedZoneName: !Ref HostedZoneName
