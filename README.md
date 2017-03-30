@@ -10,3 +10,7 @@ This means, that in event of a S3 region failure, you much do heroics to provisi
 What choices do you have now? CloudFront in front of a bucket is the most common pattern. How about CloudFront in front of multiple buckets that are in a replication set. Now the problem with this is that you cannot have multiple CloudFront distributions serving the same CNAME.
 
 This reference implementation takes that one step further and automates the CloudFront updates when a backing S3 bucket is not available.
+
+## Archetechure Diagram
+
+![Logo](https://cloudcraft.co/view/f4d7d108-5b30-4b42-ba6b-d070a726be30?key=Pj9sGzIy-gk9G1MtRdU3kw)
