@@ -12,5 +12,4 @@ What choices do you have now? CloudFront in front of a bucket is the most common
 This reference implementation takes that one step further and automates the CloudFront updates when a backing S3 bucket is not available.
 
 ## Archetechure Diagram
-
-![Logo](https://cloudcraft.co/view/f4d7d108-5b30-4b42-ba6b-d070a726be30?key=Pj9sGzIy-gk9G1MtRdU3kw)
+![Architecture Diagram](diagram.png)
