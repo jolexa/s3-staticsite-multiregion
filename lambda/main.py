@@ -4,48 +4,38 @@ import os
 import json
 import boto3
 
-r53client = boto3.client('route53')
-cfrontclient = boto3.client('cloudfront')
-
 def find_zone_id(dnsname):
     ''' Return zoneid of the given HostedZone NAME '''
+    r53client = boto3.client('route53')
     response = r53client.list_hosted_zones_by_name(
             DNSName=dnsname
         )
     return response['HostedZones'][0]['Id'].split('/')[-1]
 
-def get_cloudformation_template(stackname, region):
-    return
-
-def update_route53(url, zonename, aliastarget):
+def is_live_site(cfdistro):
     '''
-    url = www.example.com
-    zonename = example.com
-    aliastaget = cloudfront distro, 'asdf1234.cloudfront.net'
+    if 'cfdistro' is the target of the PrimaryUrl
+        return True
     '''
-    response = r53client.change_resource_record_sets(
-        HostedZoneId=find_zone_id(zonename),
-        ChangeBatch={
-            'Changes': [
-                {
-                    'Action': 'UPSERT',
-                    'ResourceRecordSet': {
-                        'Name': url,
-                        'Type': 'A',
-                        'AliasTarget': {
-                            'HostedZoneId': 'Z2FDTNDATAQYW2',
-                            'DNSName': aliastarget,
-                            'EvaluateTargetHealth': False
-                        }
-                    }
-                },
-            ]
-        }
+    r53client = boto3.client('route53')
+    response = r53client.list_resource_record_sets(
+        HostedZoneId=find_zone_id(os.environ['HostedZoneName']),
+        StartRecordName=os.environ['PrimaryUrl'],
+        MaxItems='1'
     )
+    aliastarget = response['ResourceRecordSets'][0]['AliasTarget']['DNSName'].rstrip('.')
+    if aliastarget == cfdistro:
+        return True
+    else:
+        return False
 
 def update_cf_cname(distroid, newcname):
-    '''It is ok to do this outside of cloudformation because resource can still be managed with cloudformation '''
+    '''
+    It is ok to do this outside of cloudformation because resource can
+    still be managed with cloudformation
+    '''
     print("update_cf_cname args: {0}, {1}".format(distroid, newcname))
+    cfrontclient = boto3.client('cloudfront')
     # Fetch the DistributionConfig
     response = cfrontclient.get_distribution_config(
             Id=distroid
@@ -61,110 +51,86 @@ def update_cf_cname(distroid, newcname):
     )
     return response
 
-def check_matching(dnsrecord, cfdistro):
-    '''
-    If 'dnsrecord' matches the 'match' then return true
-    otherwise, return false
-    '''
-    response = r53client.list_resource_record_sets(
-        HostedZoneId=find_zone_id(os.environ['HostedZoneName']),
-        StartRecordName=dnsrecord,
-        MaxItems='1'
-    )
-    aliastarget = response['ResourceRecordSets'][0]['AliasTarget']['DNSName'].rstrip('.')
-    if aliastarget == cfdistro:
-        return True
-    else:
-        return False
+def get_cloudformation_params(stackname, region='ca-central-1'):
+    cfn = boto3.client('cloudformation', region_name=region)
+    return cfn.describe_stacks(StackName=stackname)['Stacks'][0]['Parameters']
 
-def get_id(url):
-    print("get_id args: {0}".format(url))
-    # url: asdf.cloudfront.net
-    # return: E2134123ASDF
-    # where E2134123ASDF is the id of asdf.cloudfront.net
-    paginator = cfrontclient.get_paginator('list_distributions')
-    response_iterator = paginator.paginate()
-    for i in response_iterator:
-        for j in i['DistributionList']['Items']:
-            if j['DomainName'] == url:
-                return j['Id']
+def get_cloudformation_outputs(stackname, region='ca-central-1'):
+    cfn = boto3.client('cloudformation', region_name=region)
+    return cfn.describe_stacks(StackName=stackname)['Stacks'][0]['Outputs']
+
+def get_cloudformation_template(stackname, region='ca-central-1'):
+    cfn = boto3.client('cloudformation', region_name=region)
+    return cfn.get_template(StackName=stackname)['TemplateBody']
+
+def update_stack(stackname, siteurl, region='ca-central-1'):
+    cfn = boto3.client('cloudformation', region_name=region)
+    #template = get_cloudformation_template(stackname, region)
+    params = get_cloudformation_params(stackname, region)
+    # change the Param for SiteURL
+    for i in params:
+        if i['ParameterKey'] == "SiteURL":
+            i['ParameterValue'] = siteurl
+    # Issue update stack command
+    cfn.update_stack(
+        StackName=stackname,
+        UsePreviousTemplate=True,
+        Parameters=params,
+        Capabilities=['CAPABILITY_IAM']
+        )
+
+def get_cf_id_from_cfn(stackname, region='ca-central-1'):
+    print("get_cf_id_from_cfn args: {0} {1}".format(stackname, region))
+    outputs = get_cloudformation_outputs(stackname, region)
+    for i in outputs:
+        if i['OutputKey'] == "CloudFrontDistributionID":
+            return i['OutputValue']
 
 def lambda_handler(event, context):
-    # If an event comes in:
-    #   If the event is from the site that matches the CNAME, then switch it
-    #   If the event is from the site that doesn't match the CNAME, exit
     sns_message = json.loads(event['Records'][0]['Sns']['Message'])
     print(sns_message)
     alarm_cfendpoint = str(sns_message['AlarmDescription'])
     print(alarm_cfendpoint)
-    pdistro = os.environ['PrimaryCloudFrontDistributionDomainName']
-    sdistro = os.environ['StandbyCloudFrontDistributionDomainName']
     purl = os.environ['PrimaryUrl']
     surl = os.environ['StandbyUrl']
-    print(purl)
-    print(surl)
-    print(pdistro)
-    print(sdistro)
-    zonename = os.environ['HostedZoneName']
 
-    if check_matching(purl, alarm_cfendpoint):
+    if is_live_site(alarm_cfendpoint):
         # This means our site is down because the primary url is down!
+        # In other words, this alert is actionable
         '''
-        0) update update_cf_cname(standby_cfendpoint, fake.url)
-        1) update update_cf_cname(alarm_cfendpoint, standby.url)
-        2) update update_cf_cname(standby_cfendpoint, primary.url)
-        3) update_route53(primry.url, standby_cfendpoint)
-        4) update_route53(standby.url, alarm_cfendpoint)
-        5) Send a 'this is dirty mesage' to SNS?
+        This lambda function only triggers for one healthcheck. It is a 1:1
+        mapping. So, at this point in time:
+            Live = "MyStack"
+            Non-Live = "OtherStack"
+        which will be reversed at the end of this sequence
+
+        1) Update the Non-Live CF Distro with SiteUrl = "temp.com"
+            This should be done in boto because we don't want the cfn stack to
+            site In_Progress for 15 mins, yet
+        2) Update the Live stack with SiteUrl = StandbyUrl
+            - This makes is non-live
+            - This is in cfn because we can tolerate the stack being In_Progress
+              for some time
+        3) Update the Non-Live stack with SiteUrl = PrimaryUrl
+            - This is in cfn because we can tolerate the stack being In_Progress
+              for some time
+        4) That Should be it
         '''
+        otherdistro = get_cf_id_from_cfn(os.environ['OtherInfraStackName'],
+                region=os.environ['OtherInfraStackRegion'])
+        update_cf_cname(otherdistro, "temp.com")
 
-        # if the alarm is for the primary distro
-        if alarm_cfendpoint.lower() == pdistro.lower(): # 'Primary' Context
-            # standby distro now responds to fake url (CNAMEAlreadyExists error)
-            update_cf_cname(get_id(sdistro), "fake.com")
-            # primary distro now responds to standby url (cname)
-            update_cf_cname(get_id(pdistro), surl)
-            # standby distro now responds to primary url (cname)
-            update_cf_cname(get_id(sdistro), purl)
-            # primary url is now aliased to standby distro
-            update_route53(purl, zonename, sdistro)
-            # standby url is now aliased to primary distro
-            update_route53(surl, zonename, pdistro)
-            '''
-            The end result here is that, since the primary distro WAS serving
-            the live site, go to a 'dirty' state. That is, deviate from the
-            initial stack and serve primary url -> standby distro and serve
-            standby url -> primary distro (so you can check to see if the
-            primary region is back online, in theory)
-            
-            Is there REALLY a good way to clean this up, though?
-
-            '''
-
-        # If the alarm is for the 'standby' distro.
-        # Really the live site because that is the only way to be in this code
-        # block
-        if alarm_cfendpoint.lower() == sdistro.lower(): # 'Standby' Context
-            # primary distro now responds to fake url (CNAMEAlreadyExists error)
-            update_cf_cname(get_id(pdistro), "fake.com")
-            # standby distro now responds to standby url (cname)
-            update_cf_cname(get_id(sdistro), surl)
-            # primary distro now responds to primary url (cname)
-            update_cf_cname(get_id(pdistro), purl)
-            # primary url is now aliased to primary distro
-            update_route53(purl, zonename, pdistro)
-            # standby url is now aliased to standby distro
-            update_route53(surl, zonename, sdistro)
-            '''
-            The end result here is that, since the standby distro WAS serving
-            the live site, go back to state0. That is, primary url -> primary
-            distro, standby url -> standby distro
-            Very Confusing to wrap head around because I don't think this
-            condition will be met very often, UNLESS the stack is left in a
-            dirty state after an outage.
-            '''
+        update_stack(os.environ['MyInfraStackName'],
+            os.environ['StandbyUrl'],
+            os.environ['MyInfraStackRegion']
+            )
+        update_stack(os.environ['OtherInfraStackName'],
+            os.environ['PrimaryUrl'],
+            os.environ['OtherInfraStackRegion']
+            )
 
     else:
+
         # This means, the Standby Url is down which is bad but not worth
         # making the stacks 'dirty'
         # publish to SNS?

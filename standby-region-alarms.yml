@@ -4,15 +4,21 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   StandbyHealthCheckId:
     Type: String
-  PrimaryCloudFrontDistributionDomainName:
-    Type: String
-  StandbyCloudFrontDistributionDomainName:
+  CloudFrontDistributionDomainName:
     Type: String
   HostedZoneName:
     Type: String
   PrimaryUrl:
     Type: String
   StandbyUrl:
+    Type: String
+  MyInfraStackName:
+    Type: String
+  MyInfraStackRegion:
+    Type: String
+  OtherInfraStackName:
+    Type: String
+  OtherInfraStackRegion:
     Type: String
 
 Outputs:
@@ -32,7 +38,7 @@ Resources:
     Properties:
       ActionsEnabled: 'true'
       AlarmActions: [ !Ref StandbyHealthCheckSNS ]
-      AlarmDescription: !Ref StandbyCloudFrontDistributionDomainName
+      AlarmDescription: !Ref CloudFrontDistributionDomainName
       ComparisonOperator: LessThanThreshold
       EvaluationPeriods: '1'
       MetricName: HealthCheckStatus
@@ -57,7 +63,6 @@ Resources:
         - Statement:
             Effect: Allow
             Action:
-                - 'route53:ChangeResourceRecordSets'
                 - 'route53:ListHostedZonesByName'
                 - 'route53:ListResourceRecordSets'
             Resource: '*'
@@ -65,16 +70,24 @@ Resources:
             Effect: Allow
             Action:
                 - 'cloudfront:GetDistributionConfig'
-                - 'cloudfront:ListDistributions'
                 - 'cloudfront:UpdateDistribution'
+            Resource: '*'
+        - Statement:
+            Effect: Allow
+            Action:
+                - 'cloudformation:DecribeStacks'
+                - 'cloudformation:GetTemplate'
+                - 'cloudformation:UpdateStack'
             Resource: '*'
       Environment:
         Variables:
           HostedZoneName: !Ref HostedZoneName
           PrimaryUrl: !Ref PrimaryUrl
           StandbyUrl: !Ref StandbyUrl
-          PrimaryCloudFrontDistributionDomainName: !Ref PrimaryCloudFrontDistributionDomainName
-          StandbyCloudFrontDistributionDomainName: !Ref StandbyCloudFrontDistributionDomainName
+          MyInfraStackName: !Ref MyInfraStackName
+          MyInfraStackRegion: !Ref MyInfraStackRegion
+          OtherInfraStackName: !Ref OtherInfraStackName
+          OtherInfraStackRegion: !Ref OtherInfraStackRegion
       Events:
         SNS:
           Type: SNS
