@@ -13,3 +13,6 @@ This reference implementation takes that one step further and automates the Clou
 
 ## Archetechure Diagram
 ![Architecture Diagram](diagram.png)
+
+## Things to try:
+Changing the origin vs changing the cname
