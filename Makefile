@@ -45,7 +45,7 @@ deploy-standby: deploy-standby-infra
 	rm -f new-standby-region-alarms.yml
 
 deploy-acm:
-	aws s3 cp ./nested-route53.yml s3://static-s3-region-failure-artifacts/
+	aws s3 cp --acl public-read ./nested-route53.yml s3://static-s3-region-failure-artifacts/
 	# HACK: ACM Must be in us-east-1 for CloudFront distros
 	aws cloudformation deploy \
 		--template-file acm-certs.yml \
