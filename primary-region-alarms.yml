@@ -75,7 +75,7 @@ Resources:
         - Statement:
             Effect: Allow
             Action:
-                - 'cloudformation:DecribeStacks'
+                - 'cloudformation:DescribeStacks'
                 - 'cloudformation:GetTemplate'
                 - 'cloudformation:UpdateStack'
             Resource: '*'
