@@ -84,6 +84,8 @@ Resources:
             Effect: Allow
             Action:
                 - 'cloudfront:GetDistribution'
+                - 'route53:ListHostedZones'
+                - 'route53:ChangeResourceRecordSets'
             Resource: '*'
       Environment:
         Variables:
