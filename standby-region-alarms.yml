@@ -86,6 +86,7 @@ Resources:
                 - 'cloudfront:GetDistribution'
                 - 'route53:ListHostedZones'
                 - 'route53:ChangeResourceRecordSets'
+                - 'route53:GetChange'
             Resource: '*'
       Environment:
         Variables:
