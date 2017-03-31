@@ -9,8 +9,8 @@ def find_zone_id(dnsname):
     ''' Return zoneid of the given HostedZone NAME '''
     r53client = boto3.client('route53')
     response = r53client.list_hosted_zones_by_name(
-            DNSName=dnsname
-        )
+        DNSName=dnsname
+    )
     return response['HostedZones'][0]['Id'].split('/')[-1]
 
 def is_live_site(cfdistro):
@@ -25,10 +25,7 @@ def is_live_site(cfdistro):
         MaxItems='1'
     )
     aliastarget = response['ResourceRecordSets'][0]['AliasTarget']['DNSName'].rstrip('.')
-    if aliastarget == cfdistro:
-        return True
-    else:
-        return False
+    return bool(aliastarget == cfdistro)
 
 def update_cf_cname(distroid, newcname):
     '''
@@ -39,8 +36,8 @@ def update_cf_cname(distroid, newcname):
     cfrontclient = boto3.client('cloudfront')
     # Fetch the DistributionConfig
     response = cfrontclient.get_distribution_config(
-            Id=distroid
-        )
+        Id=distroid
+    )
     config = response['DistributionConfig']
     # Take the object and change the Alias (CNAME)
     config['Aliases']['Items'][0] = newcname
@@ -78,7 +75,7 @@ def update_stack(stackname, siteurl, region='ca-central-1'):
         UsePreviousTemplate=True,
         Parameters=params,
         Capabilities=['CAPABILITY_IAM']
-        )
+    )
 
 def get_cf_id_from_cfn(stackname, region='ca-central-1'):
     print("get_cf_id_from_cfn args: {0} {1}".format(stackname, region))
@@ -123,7 +120,7 @@ def lambda_handler(event, context):
         '''
         # Non-Live Distro gets a temp cname
         otherdistro = get_cf_id_from_cfn(os.environ['OtherInfraStackName'],
-                region=os.environ['OtherInfraStackRegion'])
+                                         region=os.environ['OtherInfraStackRegion'])
         update_cf_cname(otherdistro, "temp.com")
 
         # Live CNAME becomes Non-Live ("automatically-fixed")
@@ -133,16 +130,17 @@ def lambda_handler(event, context):
         # to become eachother. Further, since it is a nested stack, it will
         # update again to what we expect. Seems elegant despite the kludge
         myr53stackname = get_r53_stack_from_cfn(os.environ['MyInfraStackName'],
-                os.environ['MyInfraStackRegion'])
+                                                os.environ['MyInfraStackRegion']
+                                               )
         update_stack(myr53stackname,
-            "automatically-fixed."+os.environ['HostedZoneName'].strip('.'),
-            os.environ['MyInfraStackRegion']
-            )
+                     "automatically-fixed."+os.environ['HostedZoneName'].strip('.'),
+                     os.environ['MyInfraStackRegion']
+                    )
         # Live Distro becomes Non-Live
         update_stack(os.environ['MyInfraStackName'],
-            os.environ['StandbyUrl'],
-            os.environ['MyInfraStackRegion']
-            )
+                     os.environ['StandbyUrl'],
+                     os.environ['MyInfraStackRegion']
+                    )
 
         # Hopefully this is enough time to let the Route53 race settle
         print("Sleeping 20 seconds...")
@@ -155,16 +153,17 @@ def lambda_handler(event, context):
         # Therefore, we break out of the nested stack paradigm and update the
         # stack right away
         otherr53stackname = get_r53_stack_from_cfn(os.environ['OtherInfraStackName'],
-                os.environ['OtherInfraStackRegion'])
+                                                   os.environ['OtherInfraStackRegion']
+                                                  )
         update_stack(otherr53stackname,
-            os.environ['PrimaryUrl'],
-            os.environ['OtherInfraStackRegion']
-            )
+                     os.environ['PrimaryUrl'],
+                     os.environ['OtherInfraStackRegion']
+                    )
         # Non-Live Distro becomes Live
         update_stack(os.environ['OtherInfraStackName'],
-            os.environ['PrimaryUrl'],
-            os.environ['OtherInfraStackRegion']
-            )
+                     os.environ['PrimaryUrl'],
+                     os.environ['OtherInfraStackRegion']
+                    )
 
     else:
         # This means, the Standby Url is down which is bad but not worth
