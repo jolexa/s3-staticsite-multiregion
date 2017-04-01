@@ -19,7 +19,7 @@ def get_id(url):
 
 client = boto3.client('cloudfront')
 response = client.create_invalidation(
-        DistributionId=get_id('static-site3.jolexa.us'),
+        DistributionId=get_id(sys.argv[1]),
         InvalidationBatch={
             'Paths': {
                 'Quantity': 1,
