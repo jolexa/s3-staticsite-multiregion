@@ -88,3 +88,8 @@ deploy-primary: deploy-primary-infra
 		"OtherInfraStackRegion=$(STANDBY_REGION)" \
 		"DeploymentBucket=$(BUCKET_US_EAST1)" \
 		--capabilities CAPABILITY_IAM || exit 0
+
+
+push-html-primary-bucket:
+	aws s3 sync --acl public-read html/ $(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key PrimaryS3BucketName --stack-name $(PRIMARY_STACKNAME)-infra)
+	scripts/invalidate-all.py $(PRIMARY_URL)
