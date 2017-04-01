@@ -88,4 +88,3 @@ deploy-primary: deploy-primary-infra
 		"OtherInfraStackRegion=$(STANDBY_REGION)" \
 		"DeploymentBucket=$(BUCKET_US_EAST1)" \
 		--capabilities CAPABILITY_IAM || exit 0
-	rm -f new-primary-region-alarms.yml
