@@ -68,7 +68,7 @@ below:
   - S3 Replication target
   - CloudFront Distro
   - Route53 Healthcheck
-  - Route53 ALIAS target
+  - Route53 ALIAS target (in a nested stack)
 3. Standby Alarm stack (must be in us-east-1)
   - CloudWatch Alarm
   - SNS Topic
@@ -77,7 +77,7 @@ below:
   - S3 Bucket that replicates to Standby Bucket
   - CloudFront Distro
   - Route53 Healthcheck
-  - Route53 ALIAS target
+  - Route53 ALIAS target (in a nested stack)
 5. Primary Alarm stack (must be in us-east-1)
   - CloudWatch Alarm
   - SNS Topic
@@ -110,6 +110,8 @@ Maybe this is only the case with *older/mature* services?
 error to figure out what permissions are needed to update the stack.
 * CloudFormation just calls APIs, such a great model. I knew this but it started
 to become very apparent with multiple stacks for a service.
+* Nested stacks are elegant because you can update them out of band then have
+the parent stack update them back to a known state.
 
 
 ## Things I want to learn more about
