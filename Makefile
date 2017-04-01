@@ -1,11 +1,14 @@
-STACKNAME_BASE="static-s3-region-failure"
+# These variables need to be changed
+STACKNAME_BASE="s3-staticsite-multiregion"
 PRIMARY_REGION="ca-central-1"
-PRIMARY_STACKNAME="$(STACKNAME_BASE)-primary"
 STANDBY_REGION="us-west-2"
-STANDBY_STACKNAME="$(STACKNAME_BASE)-standby"
 PRIMARY_URL="static-site.jolexa.us"
 STANDBY_URL="static-site-standby.jolexa.us"
 ZONE="jolexa.us."
+BUCKET_US_EAST1="s3-staticsite-multiregion-artifacts"
+# These are helper variables
+PRIMARY_STACKNAME="$(STACKNAME_BASE)-primary"
+STANDBY_STACKNAME="$(STACKNAME_BASE)-standby"
 
 deploy-all: deploy-standby deploy-primary
 
@@ -26,7 +29,7 @@ deploy-standby: deploy-standby-infra
 	# the same region as the SNS topic
 	aws cloudformation package \
 		--template-file standby-region-alarms.yml \
-		--s3-bucket static-s3-region-failure-artifacts \
+		--s3-bucket $(BUCKET_US_EAST1) \
 		--output-template-file new-standby-region-alarms.yml
 	aws cloudformation deploy \
 		--template-file new-standby-region-alarms.yml \
@@ -45,7 +48,7 @@ deploy-standby: deploy-standby-infra
 	rm -f new-standby-region-alarms.yml
 
 deploy-acm:
-	aws s3 cp --acl public-read ./nested-route53.yml s3://static-s3-region-failure-artifacts/
+	aws s3 cp --acl public-read ./nested-route53.yml s3://$(BUCKET_US_EAST1)/
 	# HACK: ACM Must be in us-east-1 for CloudFront distros
 	aws cloudformation deploy \
 		--template-file acm-certs.yml \
@@ -72,7 +75,7 @@ deploy-primary: deploy-primary-infra
 	# the same region as the SNS topic
 	aws cloudformation package \
 		--template-file primary-region-alarms.yml \
-		--s3-bucket static-s3-region-failure-artifacts \
+		--s3-bucket $(BUCKET_US_EAST1) \
 		--output-template-file new-primary-region-alarms.yml
 	aws cloudformation deploy \
 		--template-file new-primary-region-alarms.yml \
