@@ -59,7 +59,7 @@ the first place! The architecture looks like this:
 
 ## How?
 If you want to deploy this for yourself. Modify the top 5 lines of the
-(Makefile)[https://github.com/jolexa/s3-staticsite-multiregion/blob/master/Makefile#L2-L8]
+[Makefile](https://github.com/jolexa/s3-staticsite-multiregion/blob/master/Makefile#L2-L8)
 and run `make` - this will deploy multiple cloudformation stacks. Described
 below:
 
