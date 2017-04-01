@@ -1,18 +1,39 @@
-# static-s3-region-failure
-Reference Implementation of a S3-backed multi-region static website
+# https://static-site.jolexa.us/
+=======
 
-Typically a static site backed by S3 will have a bucket with the name of "static-site.example.com".
+## Motivation
+On [Feburary 28th](https://aws.amazon.com/message/41926/), AWS S3
+in us-east-1, was
+[down](https://techcrunch.com/2017/02/28/amazon-aws-s3-outage-is-breaking-things-for-a-lot-of-websites-and-apps/)
+for several
+[hours](https://techcrunch.com/2017/03/02/aws-cloudsplains-what-happend-to-s3-storage-on-monday/).
+Many people, myself included, host static site on S3. Static sites backed by AWS
+S3 are great because they actually don't require servers to host a website
+(#serverless, :D). However, this event broke many SLAs for customers and was a
+general annoyance or even embarressing. It is true that other regions were not
+effected too much but us-east-1 is the most popular region and the biggest.
 
-Since buckets are globally namespaced, you cannot have multiple buckets in different regions with the same name.
+I don't want my personal sites to go down in this event. Companies don't want
+their assets to be unavailable, or down. Many people can benefit by a better
+solution here, surprisingly Amazon is not helping the masses in this topic.
 
-This means, that in event of a S3 region failure, you much do heroics to provision a new bucket in a new region with the same name. This might not even be possible, depending on the outage.
+My goal is to provide a reference implementation of a multi-region s3 backed
+static site (or CDN). Your mileage may vary here but it is a simple enough
+concept for me and does not require maintenance (or extra cost) so I will be
+switching my own assets to this model until something better is available.
 
-What choices do you have now? CloudFront in front of a bucket is the most common pattern. How about CloudFront in front of multiple buckets that are in a replication set. Now the problem with this is that you cannot have multiple CloudFront distributions serving the same CNAME.
+## What?
 
-This reference implementation takes that one step further and automates the CloudFront updates when a backing S3 bucket is not available.
 
-## Archetechure Diagram
-![Architecture Diagram](diagram.png)
+## How?
+If you want to deploy this for yourself. Modify the top 5 lines of the Makefile
+and run `make` - this will deploy multiple cloudformation stacks.
 
-## Things to try:
-Changing the origin vs changing the cname
+1.
+2.
+3.
+4.
+
+## Questions / Contact
+I will answer question on GitHub Issues and review Pull Requests to make this
+reference even better. Feel free to reach on on Twitter as well.
