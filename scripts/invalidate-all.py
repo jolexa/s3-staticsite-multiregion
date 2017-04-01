@@ -18,15 +18,14 @@ def get_id(url):
                 return j['Id']
 
 response = client.create_invalidation(
-        DistributionId=get_id(sys.argv[1]),
-        InvalidationBatch={
-            'Paths': {
-                'Quantity': 1,
-                'Items': [
-                    '/*'
-                    ],
-                },
-            'CallerReference': str(time()).replace(".","")
-            }
-        )
-
+    DistributionId=get_id(sys.argv[1]),
+    InvalidationBatch={
+        'Paths': {
+            'Quantity': 1,
+            'Items': [
+                '/*'
+                ],
+            },
+        'CallerReference': str(time()).replace(".", "")
+        }
+    )
