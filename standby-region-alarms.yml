@@ -27,8 +27,6 @@ Outputs:
   StandbyHealthCheckSNSArn:
     Description: SNS Arn
     Value: !Ref StandbyHealthCheckSNS
-    Export:
-      Name: StandbyHealthCheckSNSArn
 
 Resources:
   StandbyHealthCheckSNS:
