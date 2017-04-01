@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
+  DeploymentBucket:
+    Type: String
   StandbyHealthCheckId:
     Type: String
   CloudFrontDistributionDomainName:
@@ -55,7 +57,9 @@ Resources:
     Properties:
       Handler: main.lambda_handler
       Runtime: python2.7
-      CodeUri: ./deployment.zip
+      CodeUri:
+        Bucket: !Ref DeploymentBucket
+        Key: deployment.zip
       Description: Updates CF distro and Route53
       MemorySize: 128
       Timeout: 30
