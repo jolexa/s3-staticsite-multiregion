@@ -58,7 +58,7 @@ the first place! The architecture looks like this:
 ![Architecture Diagram](diagram.png)
 
 ## How?
-If you want to deploy this for yourself. Modify the top 5 lines of the
+If you want to deploy this for yourself. Modify the top 6 lines of the
 [Makefile](https://github.com/jolexa/s3-staticsite-multiregion/blob/master/Makefile#L2-L8)
 and run `make` - this will deploy multiple cloudformation stacks. Described
 below:
@@ -92,11 +92,14 @@ interfering with existing infrastructure.
 
 ## Things I learned
 
-* CloudFront is global but mostly managed in `us-east-1`. For this reason, both
-the ACM cert *and* CloudWatch Alarm for Route53 must be in `us-east-1`
 * SAM CloudFormation artifacts must be in the same region as the Lambda Function
-but Nested Stack artifacts can be in any region. This surprised me but it is why
-there is a call out to us-east-1 bucket for artifacts.
+but Nested Stack template artifacts can be in any region. This surprised me but
+it is why there is a call out to `us-east-1` bucket for artifacts.
+* The amount of work (and documentation discovery!) to get some services
+communicating across regions is a high barrier to entry.
+* CloudFront is global service but mostly managed in `us-east-1` (not
+confirmed). For this reason, both the ACM cert *and* CloudWatch Alarm for
+Route53 must be in `us-east-1`
 * ACM integration with CloudFront is a great thing, extremely easy to use and
 secure a site. I was [experimenting](https://github.com/jolexa/aws-apigw-acm)
 with custom domains in API Gateway as well and since it uses CloudFront as a
@@ -117,10 +120,25 @@ the parent stack update them back to a known state.
 ## Things I want to learn more about
 
 * I want to know if it is faster to change a CloudFront CNAME *or* to switch the
-origin of a CloudFront distro. This is a pretty hard test though and it requires
-almost the same infrastructure.
+origin of a CloudFront Distribution. This is a pretty hard test though and it
+requires almost the same infrastructure.
+
+
+## Cost
+
+In practice, this architecture for a static site hosted on S3 will only incur a
+few extra costs. Double the S3 costs for replicated storage. The Lambda, SNS, &
+Healthchecks will cost fractions of pennies. CloudWatch alarms will cost
+$.20/month. Most of these costs will be within the perpetual free tier as well
+so the actual cost will vary depending on your account size.
 
 ## Questions / Contact
 I will be more than happy to answer any questions on GitHub Issues and review
 Pull Requests to make this reference even better. Feel free to reach on on
 Twitter as well.
+
+## Credits / Thanks
+* [Dan Farrell](https://github.com/farrellit) for peer reviewing this idea with
+me.
+* https://static-site.jolexa.us/ is powered by
+[StrapdownJS](http://strapdownjs.com/)
