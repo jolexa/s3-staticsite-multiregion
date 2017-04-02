@@ -1,5 +1,6 @@
-# https://static-site.jolexa.us/
-=======
+# s3-staticsite-multiregion
+https://static-site.jolexa.us/
+_______
 
 ## Motivation
 On [Feburary 28th](https://aws.amazon.com/message/41926/), AWS S3
