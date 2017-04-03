@@ -3,8 +3,8 @@ https://static-site.jolexa.us/
 _______
 
 ## Motivation
-On [Feburary 28th](https://aws.amazon.com/message/41926/), AWS S3
-in us-east-1, was
+On [February 28th](https://aws.amazon.com/message/41926/), AWS S3
+in us-east-1 was
 [down](https://techcrunch.com/2017/02/28/amazon-aws-s3-outage-is-breaking-things-for-a-lot-of-websites-and-apps/)
 for several
 [hours](https://techcrunch.com/2017/03/02/aws-cloudsplains-what-happend-to-s3-storage-on-monday/).
@@ -12,11 +12,11 @@ Many people, myself included, host static sites (or files) on S3. Static sites
 backed by AWS S3 are great because they actually don't require servers to host a
 website (#serverless, :D). However, this outage event broke many SLAs for
 customers and was a general annoyance or even embarrassing. It is true that
-other regions were not effected too much but `us-east-1` is the most popular
+other regions were not affected too much but `us-east-1` is the most popular
 region and probably the biggest.
 
 I don't want my personal sites to go down in this event. Companies don't want
-their assets to be unavailable, or down. Many people can benefit by a better
+their assets to be unavailable, or down. Many people can benefit from a better
 solution here. In expected AWS fashion, they provide the tools (as seen here)
 but not the end-to-end solution.
 
@@ -26,8 +26,8 @@ for me and does not require maintenance (or much extra cost) so I will be
 switching my own assets to this model until something better is available.
 
 ## What?
-If the S3 bucket it to serve files directly, the S3 bucket name must be require
-the domain name itself (eg, `static-site.jolexa.us`). Since S3 has a global
+If the S3 bucket it to serve files directly, the S3 bucket name must be the
+domain name itself (eg, `static-site.jolexa.us`). Since S3 has a global
 namespace, this means that you cannot have S3 bucket replication across regions
 with the same bucket name, it is simply not possible by design. So, if we take
 this to its conclusion, let's say we have `static-site.jolexa.us` bucket in
@@ -44,18 +44,18 @@ Rumors are that, on the Feb 28 event, we couldn't even create/rename/update S3
 in `us-west-2` since the S3 metadata service in `us-east-1` was not available (I
 didn't confirm this).
 
-A common pattern is to have CloudFront fronting a S3 bucket. This works but has
+A common pattern is to have CloudFront fronting an S3 bucket. This works but has
 another set of limitations. Mainly that you cannot have multiple CF distros
 which serve the same domain.
 
 So, what does this mean? It means, that there is no native way to have a
 multi-region static site hosted on S3.
 
-The solution presented here, builds a S3 replication set with two CloudFront
+The solution presented here, builds an S3 replication set with two CloudFront
 distros and then will automagically switch everything around when a region is
 down. Services leveraged: S3, CloudFront, CloudWatch, SNS, Lambda, & Route53
 Health Checks which makes it entirely serverless, this is a big appeal of the
-ease of a S3 hosted site in the first place! The architecture looks like this:
+ease of an S3 hosted site in the first place! The architecture looks like this:
 
 ![Architecture Diagram](diagram.png)
 
@@ -86,7 +86,7 @@ below:
   - SNS Topic
   - Lambda Function
 
-The Lambda Function is designed to be ran by either CloudWatch alarm and does
+The Lambda Function is designed to be run by either CloudWatch alarm and does
 the proper action based on Environment Variables that are passed at deploy time.
 
 I choose to manage everything inside of CloudFormation because it represents the
