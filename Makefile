@@ -5,7 +5,7 @@ STANDBY_REGION="us-west-2"
 PRIMARY_URL="static-site.jolexa.us"
 STANDBY_URL="static-site-standby.jolexa.us"
 ZONE="jolexa.us."
-BUCKET_US_EAST1="s3-staticsite-multiregion-artifacts"
+BUCKET_US_EAST1="s3-staticsite-multiregion-artifacts" # This has to be created out of band
 # These are helper variables
 PRIMARY_STACKNAME="$(STACKNAME_BASE)-primary"
 STANDBY_STACKNAME="$(STACKNAME_BASE)-standby"
