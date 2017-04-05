@@ -22,6 +22,8 @@ Parameters:
     Type: String
   OtherInfraStackRegion:
     Type: String
+  AdminContactEmail:
+    Type: String
 
 Outputs:
   PrimaryHealthCheckSNSArn:
@@ -31,6 +33,10 @@ Outputs:
 Resources:
   PrimaryHealthCheckSNS:
     Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref AdminContactEmail
+          Protocol: email
 
 # NOTE: The alarm MUST be in us-east-1
   PrimaryHealthCheckFailedAlarm:

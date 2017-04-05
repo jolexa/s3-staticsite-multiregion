@@ -5,6 +5,8 @@ STANDBY_REGION="us-west-2"
 PRIMARY_URL="static-site.jolexa.us"
 STANDBY_URL="static-site-standby.jolexa.us"
 ZONE="jolexa.us."
+# This below won't work for all domains, YMMV
+ADMINCONTACTEMAIL=$(shell whois $(ZONE) |grep 'Technical Contact Email'| grep -o '[a-zA-Z+]*@.*')
 BUCKET_US_EAST1="s3-staticsite-multiregion-artifacts" # This has to be created out of band
 # These are helper variables
 PRIMARY_STACKNAME="$(STACKNAME_BASE)-primary"
@@ -40,12 +42,13 @@ deploy-standby: deploy-standby-infra
 		"OtherInfraStackName=$(PRIMARY_STACKNAME)-infra" \
 		"OtherInfraStackRegion=$(PRIMARY_REGION)" \
 		"DeploymentBucket=$(BUCKET_US_EAST1)" \
+		"AdminContactEmail=$(ADMINCONTACTEMAIL)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 prep:
-	aws s3 cp --acl public-read ./nested-route53.yml s3://$(BUCKET_US_EAST1)/
+	aws s3 cp --acl public-read ./nested-route53.yml s3://$(BUCKET_US_EAST1)
 	cd lambda && zip -r9 deployment.zip main.py && \
-		aws s3 cp ./deployment.zip s3://$(BUCKET_US_EAST1)/ && \
+		aws s3 cp ./deployment.zip s3://$(BUCKET_US_EAST1) && \
 		rm -f deployment.zip
 
 deploy-acm: prep
@@ -87,6 +90,7 @@ deploy-primary: deploy-primary-infra
 		"OtherInfraStackName=$(STANDBY_STACKNAME)-infra" \
 		"OtherInfraStackRegion=$(STANDBY_REGION)" \
 		"DeploymentBucket=$(BUCKET_US_EAST1)" \
+		"AdminContactEmail=$(ADMINCONTACTEMAIL)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 
