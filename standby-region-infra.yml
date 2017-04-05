@@ -43,6 +43,7 @@ Resources:
         FullyQualifiedDomainName: !Join [ '.', [ !Join [ '-', [ "s3", !Ref "AWS::Region" ] ], "amazonaws.com" ] ]
         Type: "HTTP"
         ResourcePath: !Join [ '/', [ '', !Ref 'StandbyReplicationBucket', 'index.html' ] ]
+        FailureThreshold: 1
       HealthCheckTags:
         - Key: "Name"
           Value: "StandbyBucketHealthCheck"
