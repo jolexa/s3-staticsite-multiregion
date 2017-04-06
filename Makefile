@@ -98,6 +98,6 @@ deploy-primary: deploy-primary-infra
 
 
 push-html-primary-bucket:
-	aws s3 sync --sse --acl public-read --storage-class REDUCED_REDUNDANCY html/ \
+	aws s3 sync --sse --acl public-read html/ \
 		s3://$(shell scripts/find-cfn-output-value.py --region $(PRIMARY_REGION) --output-key PrimaryS3BucketName --stack-name $(PRIMARY_STACKNAME)-infra)/
 	scripts/invalidate-all.py $(PRIMARY_URL)
