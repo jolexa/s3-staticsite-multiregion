@@ -66,7 +66,7 @@ Resources:
         Key: deployment.zip
       Description: Updates CF distro and Route53
       MemorySize: 128
-      Timeout: 30
+      Timeout: 60
       Policies:
         - Statement:
             Effect: Allow
