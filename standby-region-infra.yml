@@ -10,6 +10,8 @@ Parameters:
   ZoneName:
     Type: String
     Description: This is the ZoneName of the SiteURL
+  USEast1Bucket:
+    Type: String
 
 Outputs:
   StandbyHealthCheckId:
@@ -75,7 +77,7 @@ Resources:
   Route53Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/static-s3-region-failure-artifacts/nested-route53.yml
+      TemplateURL: !Join ['', [ "https://s3.amazonaws.com/", !Ref 'USEast1Bucket', '/nested-route53.yml' ] ]
       Parameters:
         ZoneName: !Ref ZoneName
         SiteURL: !Ref SiteURL

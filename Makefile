@@ -22,6 +22,7 @@ deploy-standby-infra: deploy-acm
 		--parameter-overrides "ACMCertArn=$(shell scripts/find-cfn-output-value.py --region us-east-1 --stack-name $(STACKNAME_BASE)-acm-certs --output-key ACMCertArn)" \
 		"ZoneName=$(ZONE)" \
 		"SiteURL=$(STANDBY_URL)" \
+		"USEast1Bucket=$(BUCKET_US_EAST1)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 deploy-standby: deploy-standby-infra
@@ -69,6 +70,7 @@ deploy-primary-infra: deploy-acm
 		"ACMCertArn=$(shell scripts/find-cfn-output-value.py --region us-east-1 --stack-name $(STACKNAME_BASE)-acm-certs --output-key ACMCertArn)" \
 		"SiteURL=$(PRIMARY_URL)" \
 		"ZoneName=$(ZONE)" \
+		"USEast1Bucket=$(BUCKET_US_EAST1)" \
 		--capabilities CAPABILITY_IAM || exit 0
 
 deploy-primary: deploy-primary-infra
