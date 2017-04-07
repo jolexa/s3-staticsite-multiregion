@@ -51,10 +51,10 @@ which serve the same domain.
 So, what does this mean? It means, that there is no native way to have a
 multi-region static site hosted on S3.
 
-The solution presented here, builds an S3 replication set with two CloudFront
+The solution presented here builds an S3 replication set with two CloudFront
 distros and then will automagically switch everything around when a region is
 down. Services leveraged: S3, CloudFront, CloudWatch, SNS, Lambda, & Route53
-Health Checks which makes it entirely serverless, this is a big appeal of the
+Health Checks which makes it entirely serverless. This is a big appeal of the
 ease of an S3 hosted site in the first place! The architecture looks like this:
 
 ![Architecture
@@ -126,7 +126,7 @@ interfering with existing infrastructure.
   with `boto3`. I spent many cycles fixing out-of-sync resources that I could no
   longer manage.
 
-* This is a odd one and not related to this project. S3 [Reduced Redundancy
+* This is an odd one and not related to this project. S3 [Reduced Redundancy
   Storage](https://aws.amazon.com/s3/reduced-redundancy/) is more expensive than
   [Standard Storage](https://aws.amazon.com/s3/pricing/). This means that you
   will pay more for a worse SLA (more chance to lose objects) and just doesn't
@@ -150,7 +150,7 @@ few extra costs over a directly backed site.
 * CloudFront: Transfer is actually cheaper than S3 transfer to the internet.
   Requests are more expensive.
 * Lambda: Fractions of pennies if they are even used. No cost otherwise.
-* SNS: No Charge to the lambda invokation. Maybe a fraction of a penny if an
+* SNS: No Charge to the lambda invocation. Maybe a fraction of a penny if an
   email notice is sent.
 * Health Check: No charge for checking AWS endpoint.
 * CloudWatch Alarms: $.20/month
@@ -199,6 +199,17 @@ Example](https://raw.githubusercontent.com/jolexa/s3-staticsite-multiregion/mast
 
 I'm sure this ~2 minute result can be tuned further with more frequent health
 check intervals and tighter timings.
+
+### Cloudflare
+A colleague told me that *"this whole thing looks complicated and what about
+[cloudflare](https://www.cloudflare.com/)?"* I use cloudflare on some other web
+properties and I agree, this *is* complicated!  Cloudflare offers static asset
+caching as well if your origin is offline. The free plan will crawl your site
+every 3 days. The next level costs a magnitude more than the costs listed above.
+It is up for debate on if that is worth it or not. In the end, I feel like for
+it might be worth using Cloudflare over this complicated thing if you desire
+simplicity. There might be some other features that can easily check multiple
+origins from cloudflare with different plans.
 
 ## Questions / Contact
 I will be more than happy to answer any questions on GitHub Issues and review
