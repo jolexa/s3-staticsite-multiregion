@@ -57,7 +57,8 @@ down. Services leveraged: S3, CloudFront, CloudWatch, SNS, Lambda, & Route53
 Health Checks which makes it entirely serverless, this is a big appeal of the
 ease of an S3 hosted site in the first place! The architecture looks like this:
 
-![Architecture Diagram](diagram.png)
+![Architecture
+Diagram](https://raw.githubusercontent.com/jolexa/s3-staticsite-multiregion/master/diagram.png)
 
 ## How?
 If you want to deploy this for yourself. Clone the repo, modify the top 6 lines
@@ -118,6 +119,18 @@ interfering with existing infrastructure.
   to become very apparent with multiple stacks for a service.
 * Nested stacks are elegant because you can update them out of band then have
   the parent stack update them back to a known state.
+* Route53 Health Checks will report an endpoint unhealthy with *18%* of health
+  checkers report unhealthy. This is not configurable and may change in the
+  future. Odd choice?
+* Once something is deployed with cloudformation, be careful about updating it
+  with `boto3`. I spent many cycles fixing out-of-sync resources that I could no
+  longer manage.
+
+* This is a odd one and not related to this project. S3 [Reduced Redundancy
+  Storage](https://aws.amazon.com/s3/reduced-redundancy/) is more expensive than
+  [Standard Storage](https://aws.amazon.com/s3/pricing/). This means that you
+  will pay more for a worse SLA (more chance to lose objects) and just doesn't
+  make sense...
 
 
 ## Things I want to learn more about
@@ -130,10 +143,62 @@ interfering with existing infrastructure.
 ## Cost
 
 In practice, this architecture for a static site hosted on S3 will only incur a
-few extra costs. Double the S3 costs for replicated storage. The Lambda, SNS, &
-Health Checks will cost fractions of pennies. CloudWatch alarms will cost
-$.20/month. Most of these costs will be within the perpetual free tier as well
-so the actual cost will vary depending on your account size.
+few extra costs over a directly backed site.
+
+* S3: Double the S3 costs for replicated storage. (This site is 4M so I won't
+  even notice it on my bill)
+* CloudFront: Transfer is actually cheaper than S3 transfer to the internet.
+  Requests are more expensive.
+* Lambda: Fractions of pennies if they are even used. No cost otherwise.
+* SNS: No Charge to the lambda invokation. Maybe a fraction of a penny if an
+  email notice is sent.
+* Health Check: No charge for checking AWS endpoint.
+* CloudWatch Alarms: $.20/month
+* ACM (SSL): Free - Really nice too, because the time burden of
+  updating/rotating SSL certs is not applicable anymore. So extra cost savings
+  in terms of your time.
+
+Most of these pennies will be within the perpetual free tier as well so the
+actual cost will vary depending on your account size.
+
+## Testing
+I have fabricated a
+[test](https://github.com/jolexa/s3-staticsite-multiregion/blob/master/tests/fabricated-failover-test.sh)
+and the timings of breaking the site to a having a mostly working live site
+again is about 2 minutes.
+
+``` shell
+$ date && ./break-site.sh && ./fabricated-failover-test.sh
+Thu Apr  6 18:44:28 CDT 2017
+Site broken at: Thu Apr  6 18:44:31 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:44:31 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:44:41 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:44:51 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:45:02 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:45:12 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:45:22 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:45:32 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:45:42 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:45:53 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:46:03 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:46:13 CDT 2017
+Site is at: us-west-2, probably broken: Thu Apr  6 18:46:23 CDT 2017
+Site is now in ca-central-1, working again: Thu Apr  6 18:46:34 CDT 2017
+```
+
+The *really* interesting thing is when you check the site from around the world
+during a failover.  The only access I have to this is by using Amazon Health
+Checks again, this time checking the actual URL. From this, you can start
+learning about CloudFront latency and why it takes 15-60 minutes to update a
+CloudFront distro with CloudFormation, or in the console. I think this is
+interesting because the site quickly becomes live again per Health Check
+standards (18% reporting ok) but takes awhile from around the world.
+
+![HealthCheck
+Example](https://raw.githubusercontent.com/jolexa/s3-staticsite-multiregion/master/healthcheck-primaryurl-failover.png)
+
+I'm sure this ~2 minute result can be tuned further with more frequent health
+check intervals and tighter timings.
 
 ## Questions / Contact
 I will be more than happy to answer any questions on GitHub Issues and review

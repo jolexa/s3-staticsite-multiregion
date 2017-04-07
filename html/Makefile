@@ -1,4 +1,4 @@
 all:
 	./build.sh
 	cd ../ && make push-html-primary-bucket
-	rm -f diagram.png index.html
+	rm -f index.html
