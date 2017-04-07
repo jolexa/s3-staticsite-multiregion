@@ -61,8 +61,8 @@ ease of an S3 hosted site in the first place! The architecture looks like this:
 Diagram](https://raw.githubusercontent.com/jolexa/s3-staticsite-multiregion/master/diagram.png)
 
 ## How?
-If you want to deploy this for yourself. Clone the repo, modify the top 6 lines
-of the
+If you want to deploy this for yourself. Clone the repo, modify the top lines of
+the
 [Makefile](https://github.com/jolexa/s3-staticsite-multiregion/blob/master/Makefile#L2-L8)
 and run `make` - this will deploy multiple cloudformation stacks.  Described
 below:
