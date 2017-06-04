@@ -7,7 +7,7 @@ STANDBY_URL="static-site-standby.jolexa.us"
 ZONE="jolexa.us."
 DOMAIN="jolexa.us"
 # This below won't work for all domains, YMMV
-ADMINCONTACTEMAIL=$(shell whois $(DOMAIN) |grep 'Technical Contact Email'| grep -o '[a-zA-Z+]*@.*')
+ADMINCONTACTEMAIL=$(shell whois $(DOMAIN) | grep 'Tech.*Email'| grep -o '[a-zA-Z+-\.]*@.*')
 BUCKET_US_EAST1="s3-staticsite-multiregion-artifacts" # This has to be created out of band
 # These are helper variables
 PRIMARY_STACKNAME="$(STACKNAME_BASE)-primary"
