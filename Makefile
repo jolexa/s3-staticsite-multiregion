@@ -4,8 +4,8 @@ PRIMARY_REGION="ca-central-1"
 STANDBY_REGION="us-west-2"
 PRIMARY_URL="static-site.jolexa.us"
 STANDBY_URL="static-site-standby.jolexa.us"
-ZONE="jolexa.us."
 DOMAIN="jolexa.us"
+ZONE="$(DOMAIN)."
 # This below won't work for all domains, YMMV
 ADMINCONTACTEMAIL=$(shell whois $(DOMAIN) | grep 'Tech.*Email'| grep -o '[a-zA-Z+-\.]*@.*')
 BUCKET_US_EAST1="s3-staticsite-multiregion-artifacts" # This has to be created out of band
