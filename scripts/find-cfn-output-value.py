@@ -17,4 +17,4 @@ response = client.describe_stacks(
 # loop through outputs and find the correct one
 for output in response['Stacks'][0]['Outputs']:
     if output['OutputKey'] == args.outputkey:
-        print output['OutputValue']
+        print(output['OutputValue'])
