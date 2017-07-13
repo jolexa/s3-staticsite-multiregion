@@ -49,9 +49,9 @@ deploy-standby: deploy-standby-infra
 
 prep:
 	aws s3 cp --acl public-read ./nested-route53.yml s3://$(BUCKET_US_EAST1)
-	cd lambda && zip -r9 deployment.zip main.py && \
-		aws s3 cp ./deployment.zip s3://$(BUCKET_US_EAST1) && \
-		rm -f deployment.zip
+	cd lambda && zip -r9 /tmp/deployment.zip main.py && \
+		aws s3 cp --region us-east-1 /tmp/deployment.zip s3://$(BUCKET_US_EAST1) && \
+		rm -f /tmp/deployment.zip
 
 deploy-acm: prep
 	# HACK: ACM Must be in us-east-1 for CloudFront distros
