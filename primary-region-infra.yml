@@ -94,7 +94,7 @@ Resources:
         FailureThreshold: 1
       HealthCheckTags:
         - Key: "Name"
-          Value: "PrimaryBucketHealthCheck"
+          Value: !Sub "PrimaryBucket - ${SiteURL}"
 
   PrimaryCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution

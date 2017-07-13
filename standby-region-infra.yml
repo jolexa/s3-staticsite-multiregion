@@ -48,7 +48,7 @@ Resources:
         FailureThreshold: 1
       HealthCheckTags:
         - Key: "Name"
-          Value: "StandbyBucketHealthCheck"
+          Value: !Sub "StandbyBucket - ${SiteURL}"
 
   StandbyCloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
