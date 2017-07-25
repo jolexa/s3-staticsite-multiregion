@@ -68,7 +68,8 @@ Resources:
         Enabled: true
         HttpVersion: http2
         Origins:
-        - DomainName: !Sub "${StandbyReplicationBucket}.s3-website-${AWS::Region}.amazonaws.com"
+          # Use the WebsiteURL /but/ use the part after '//'
+        - DomainName: !Select [ "1" , "Fn::Split": [ "//", "Fn::GetAtt": [ StandbyReplicationBucket, WebsiteURL ] ] ]
           Id: StandbyBucketOrigin
           CustomOriginConfig:
             OriginProtocolPolicy: "http-only"

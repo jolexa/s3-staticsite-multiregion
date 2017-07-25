@@ -114,7 +114,8 @@ Resources:
         Enabled: 'true'
         HttpVersion: http2
         Origins:
-        - DomainName: !Sub "${PrimaryBucket}.s3-website-${AWS::Region}.amazonaws.com"
+          # Use the WebsiteURL /but/ use the part after '//'
+        - DomainName: !Select [ "1" , "Fn::Split": [ "//", "Fn::GetAtt": [ PrimaryBucket, WebsiteURL ] ] ]
           Id: PrimaryBucketOrigin
           CustomOriginConfig:
             OriginProtocolPolicy: "http-only"
