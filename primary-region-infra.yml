@@ -53,6 +53,8 @@ Resources:
             Prefix: ""
             Destination:
               Bucket: !Ref StandbyReplBucketArn
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
   # Role for the bucket
   StaticS3ReplRole:
     Type: AWS::IAM::Role
@@ -112,10 +114,10 @@ Resources:
         Enabled: 'true'
         HttpVersion: http2
         Origins:
-        - DomainName: !Join [ '.', [ !Ref PrimaryBucket, 's3.amazonaws.com' ] ]
+        - DomainName: !Sub "${PrimaryBucket}.s3-website-${AWS::Region}.amazonaws.com"
           Id: PrimaryBucketOrigin
-          S3OriginConfig:
-            OriginAccessIdentity: ""
+          CustomOriginConfig:
+            OriginProtocolPolicy: "http-only"
         PriceClass: PriceClass_100
         ViewerCertificate:
           AcmCertificateArn: !Ref ACMCertArn

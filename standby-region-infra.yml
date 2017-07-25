@@ -37,6 +37,8 @@ Resources:
     Properties:
       VersioningConfiguration:
         Status: Enabled
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
 
   StandbyHealthCheck:
     Type: "AWS::Route53::HealthCheck"
@@ -66,10 +68,10 @@ Resources:
         Enabled: true
         HttpVersion: http2
         Origins:
-        - DomainName: !Join [ '.', [ !Ref StandbyReplicationBucket, 's3.amazonaws.com' ] ]
+        - DomainName: !Sub "${StandbyReplicationBucket}.s3-website-${AWS::Region}.amazonaws.com"
           Id: StandbyBucketOrigin
-          S3OriginConfig:
-            OriginAccessIdentity: ""
+          CustomOriginConfig:
+            OriginProtocolPolicy: "http-only"
         PriceClass: PriceClass_100
         ViewerCertificate:
           AcmCertificateArn: !Ref ACMCertArn
